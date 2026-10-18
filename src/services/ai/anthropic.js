@@ -1,12 +1,9 @@
+import { AIError } from './errors.js'
+
 const API_URL = 'https://api.anthropic.com/v1/messages'
 const API_VERSION = '2023-06-01'
 
-export class AIError extends Error {
-  constructor(message, { cause } = {}) {
-    super(message, { cause })
-    this.name = 'AIError'
-  }
-}
+export { AIError }
 
 /**
  * Cliente mínimo de la API de mensajes de Anthropic. Recibe `fetchImpl` para poder
@@ -14,6 +11,7 @@ export class AIError extends Error {
  */
 export function createAnthropicClient({ apiKey, model, timeoutMs = 15000, fetchImpl = fetch }) {
   return {
+    provider: 'anthropic',
     model,
     async complete({ system, user, maxTokens = 600 }) {
       let res
