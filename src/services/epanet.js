@@ -61,7 +61,16 @@ export function toEpanet(network, { title = 'HydroGraph AI' } = {}) {
 
   const pipes = network.pipes.map((p) => {
     const length = p.length ?? pipeLength(nodeById.get(p.from), nodeById.get(p.to))
-    return row(sanitize(p.id), endpoint(p.from, 'from'), endpoint(p.to, 'to'), num(length), num(p.diameter), p.roughness ?? DEFAULT_ROUGHNESS, 0, 'Open')
+    return row(
+      sanitize(p.id),
+      endpoint(p.from, 'from'),
+      endpoint(p.to, 'to'),
+      num(length),
+      num(p.diameter),
+      p.roughness ?? DEFAULT_ROUGHNESS,
+      0,
+      'Open',
+    )
   })
 
   const section = (name, header, rows) => [`[${name}]`, `;${header}`, ...rows, ''].join('\n')
