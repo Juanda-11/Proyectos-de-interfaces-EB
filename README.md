@@ -10,6 +10,7 @@ API REST de **HydroGraph AI**, editor de redes de suministro de agua asistido po
 | ------------------------- | ------------------------------------------------------------------------------------------------ |
 | `GET /api/health`         | Estado del servicio y motor de IA activo                                                         |
 | `POST /api/simulate`      | Velocidad y pérdida de carga (Hazen-Williams) por tubería, presión por nodo y lista de problemas |
+| `POST /api/balance`       | Calcula los caudales de cada tramo a partir de las demandas de los nodos                         |
 | `POST /api/optimize`      | Corrige diámetros con velocidad excesiva y sube la altura de bombas si falta presión             |
 | `POST /api/export/epanet` | Descarga la red como archivo `.inp` de EPANET 2                                                  |
 | `POST /api/copilot`       | Orden en lenguaje natural: diseñar una red o auditar la actual                                   |
