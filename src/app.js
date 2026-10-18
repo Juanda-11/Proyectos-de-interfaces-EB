@@ -12,6 +12,7 @@ import { simulateRouter } from './routes/simulate.js'
 import { copilotRouter } from './routes/copilot.js'
 import { optimizeRouter } from './routes/optimize.js'
 import { exportRouter } from './routes/export.js'
+import { balanceRouter } from './routes/balance.js'
 import { indexRouter } from './routes/index.js'
 
 /**
@@ -45,6 +46,7 @@ export function createApp({ config = loadConfig(), log, ai } = {}) {
     indexRouter(),
     healthRouter({ config }),
     simulateRouter(),
+    balanceRouter(),
     optimizeRouter(),
     exportRouter(),
     copilotRouter({ ai }),

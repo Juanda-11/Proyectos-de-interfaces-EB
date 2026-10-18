@@ -14,6 +14,7 @@ export function indexRouter() {
       endpoints: [
         'GET /api/health',
         'POST /api/simulate',
+        'POST /api/balance',
         'POST /api/optimize',
         'POST /api/export/epanet',
         'POST /api/copilot',
