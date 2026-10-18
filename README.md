@@ -63,7 +63,7 @@ Cualquier fallo de la IA (sin clave, timeout, JSON inválido, valores fuera de r
 
 1. En Vercel: **Add New → Project**, importa este repositorio (el preset es _Other_, no hay paso de build).
 2. En _Settings → Environment Variables_ define `CORS_ORIGINS` con la URL del frontend (p. ej. `https://hydrograph-ai.vercel.app`) y, si quieres IA, `GEMINI_API_KEY` (gratuita).
-3. Despliega. [`vercel.json`](vercel.json) enruta `/api/*` a la función [`api/index.js`](api/index.js).
+3. Despliega. Vercel detecta Express y usa [`src/index.js`](src/index.js) como entrada (no hace falta `vercel.json`).
 4. Comprueba `https://<tu-backend>.vercel.app/api/health`.
 5. Despliega el [frontend](https://github.com/Juanda-11/Proyectos-de-interfaces-E/blob/main/docs/DEPLOY.md) con `VITE_API_URL` apuntando a esta URL.
 
@@ -81,6 +81,7 @@ npm run format       # Prettier
 ```
 src/
 ├── create-app.js       # Construcción de la app Express (dependencias inyectables)
+├── index.js            # Entrada de Vercel (export por defecto de la app)
 ├── local-server.js     # Arranque local
 ├── config.js           # Variables de entorno validadas
 ├── routes/             # health, simulate, optimize, export, copilot
@@ -94,7 +95,6 @@ src/
 │   └── ai/anthropic.js # Cliente de la API de Anthropic
 ├── schemas/network.js  # Validación (zod)
 └── middleware/         # errores, validación, contexto de petición
-api/index.js            # Entrada serverless de Vercel
 ```
 
 ## Licencia
