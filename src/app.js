@@ -44,6 +44,7 @@ export function createApp({ config = loadConfig(), log, ai } = {}) {
     healthRouter({ config }),
     simulateRouter(),
     optimizeRouter(),
+    exportRouter(),
     copilotRouter({ ai }),
   )
 
