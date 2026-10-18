@@ -6,7 +6,7 @@ import { loadConfig } from './config.js'
 import { createLogger } from './utils/logger.js'
 import { requestContext } from './middleware/requestContext.js'
 import { errorHandler, notFound } from './middleware/errorHandler.js'
-import { createAnthropicClient } from './services/ai/anthropic.js'
+import { createAiClient } from './services/ai/index.js'
 import { healthRouter } from './routes/health.js'
 import { simulateRouter } from './routes/simulate.js'
 import { copilotRouter } from './routes/copilot.js'
@@ -20,7 +20,7 @@ import { indexRouter } from './routes/index.js'
  */
 export function createApp({ config = loadConfig(), log, ai } = {}) {
   log ??= createLogger({ level: config.env === 'test' ? 'silent' : 'info' })
-  ai ??= config.ai.apiKey ? createAnthropicClient(config.ai) : null
+  ai ??= createAiClient(config.ai)
 
   const app = express()
   app.disable('x-powered-by')

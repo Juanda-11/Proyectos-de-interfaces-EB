@@ -7,6 +7,7 @@ export function healthRouter({ config }) {
       status: 'ok',
       uptime: Math.round(process.uptime()),
       ai: config.ai.apiKey ? config.ai.model : 'rules',
+      provider: config.ai.apiKey ? config.ai.provider : 'rules',
     })
   })
   return router
