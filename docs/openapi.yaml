@@ -20,7 +20,13 @@ paths:
                 properties:
                   status: { type: string, example: ok }
                   uptime: { type: integer, description: Segundos en ejecución }
-                  ai: { type: string, description: 'Modelo de IA activo o "rules"', example: rules }
+                  ai:
+                    {
+                      type: string,
+                      description: 'Modelo de IA activo o "rules"',
+                      example: gemini-2.5-flash,
+                    }
+                  provider: { type: string, enum: [gemini, anthropic, rules] }
   /api/simulate:
     post:
       summary: Simula la red
@@ -96,8 +102,8 @@ paths:
       summary: Copiloto en lenguaje natural
       description: >
         Interpreta una orden. Si pide diseñar, devuelve una red nueva; si pide auditar,
-        simula la red enviada y explica los problemas. Usa Claude si el servidor tiene
-        `ANTHROPIC_API_KEY`; si no, un motor por reglas.
+        simula la red enviada y explica los problemas. Usa Gemini o Claude si el servidor tiene
+        `GEMINI_API_KEY` o `ANTHROPIC_API_KEY`; si no, un motor por reglas.
       requestBody:
         required: true
         content:

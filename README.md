@@ -20,7 +20,7 @@ La especificación completa está en [`docs/openapi.yaml`](docs/openapi.yaml).
 
 ```bash
 npm install
-cp .env.example .env     # opcional: añade ANTHROPIC_API_KEY
+cp .env.example .env     # opcional: añade GEMINI_API_KEY para activar la IA
 npm run dev              # http://localhost:3001
 ```
 
@@ -31,18 +31,21 @@ curl -s localhost:3001/api/copilot -H 'content-type: application/json' \
 
 ## Variables de entorno
 
-| Variable            | Por defecto             | Uso                                                                          |
-| ------------------- | ----------------------- | ---------------------------------------------------------------------------- |
-| `PORT`              | `3001`                  | Puerto local                                                                 |
-| `CORS_ORIGINS`      | `http://localhost:5173` | Orígenes permitidos, separados por comas. En producción, la URL del frontend |
-| `RATE_LIMIT_MAX`    | `60`                    | Peticiones por minuto y por IP                                               |
-| `ANTHROPIC_API_KEY` | —                       | Activa el copiloto con Claude. Sin ella funciona el motor por reglas         |
-| `ANTHROPIC_MODEL`   | `claude-haiku-5-5`      | Modelo usado por el copiloto                                                 |
-| `AI_TIMEOUT_MS`     | `15000`                 | Tiempo máximo de espera a la IA                                              |
+| Variable            | Por defecto             | Uso                                                                                                          |
+| ------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `PORT`              | `3001`                  | Puerto local                                                                                                 |
+| `CORS_ORIGINS`      | `http://localhost:5173` | Orígenes permitidos, separados por comas. En producción, la URL del frontend                                 |
+| `RATE_LIMIT_MAX`    | `60`                    | Peticiones por minuto y por IP                                                                               |
+| `GEMINI_API_KEY`    | —                       | Activa el copiloto con **Gemini** (clave gratuita de [Google AI Studio](https://aistudio.google.com/apikey)) |
+| `GEMINI_MODEL`      | `gemini-2.5-flash`      | Modelo de Gemini; cámbialo si Google lo retira o quieres otro con más cupo gratuito                          |
+| `ANTHROPIC_API_KEY` | —                       | Alternativa: copiloto con Claude                                                                             |
+| `ANTHROPIC_MODEL`   | `claude-haiku-5-5`      | Modelo de Anthropic                                                                                          |
+| `AI_PROVIDER`       | automático              | `gemini`, `anthropic` o `rules`. Por defecto: Gemini si hay clave, luego Anthropic, luego reglas             |
+| `AI_TIMEOUT_MS`     | `15000`                 | Tiempo máximo de espera a la IA                                                                              |
 
 ## Cómo funciona la IA
 
-El copiloto **no deja que el modelo invente la red**. Claude interpreta la petición (`"un barrio con cinco manzanas"` → `{sectors: 5, demandPerSector: 6}`) y el backend construye la red con fórmulas hidráulicas, de modo que el resultado siempre es válido y dimensionado. Para auditar, Claude solo redacta una explicación a partir de los resultados de la simulación.
+El copiloto **no deja que el modelo invente la red**. El modelo (Gemini o Claude) interpreta la petición (`"un barrio con cinco manzanas"` → `{sectors: 5, demandPerSector: 6}`) y el backend construye la red con fórmulas hidráulicas, de modo que el resultado siempre es válido y dimensionado. Para auditar, el modelo solo redacta una explicación a partir de los resultados de la simulación.
 
 Cualquier fallo de la IA (sin clave, timeout, JSON inválido, valores fuera de rango) hace que se use el motor por reglas, y la respuesta indica `"source": "ai" | "rules"`.
 
@@ -58,7 +61,7 @@ Cualquier fallo de la IA (sin clave, timeout, JSON inválido, valores fuera de r
 ## Despliegue en Vercel
 
 1. En Vercel: **Add New → Project**, importa este repositorio (el preset es _Other_, no hay paso de build).
-2. En _Settings → Environment Variables_ define `CORS_ORIGINS` con la URL del frontend (p. ej. `https://hydrograph-ai.vercel.app`) y, si quieres IA, `ANTHROPIC_API_KEY`.
+2. En _Settings → Environment Variables_ define `CORS_ORIGINS` con la URL del frontend (p. ej. `https://hydrograph-ai.vercel.app`) y, si quieres IA, `GEMINI_API_KEY` (gratuita).
 3. Despliega. [`vercel.json`](vercel.json) enruta `/api/*` a la función [`api/index.js`](api/index.js).
 4. Comprueba `https://<tu-backend>.vercel.app/api/health`.
 5. Despliega el [frontend](https://github.com/Juanda-11/Proyectos-de-interfaces-E/blob/main/docs/DEPLOY.md) con `VITE_API_URL` apuntando a esta URL.
