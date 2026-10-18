@@ -52,6 +52,8 @@ export function createApp({ config = loadConfig(), log, ai } = {}) {
     copilotRouter({ ai }),
   )
 
+  app.get('/', (_req, res) => res.redirect('/api'))
+
   app.use(notFound)
   app.use(errorHandler)
   return app

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import request from 'supertest'
-import { createApp } from '../src/app.js'
+import { createApp } from '../src/create-app.js'
 import { loadConfig } from '../src/config.js'
 import { demoNetwork } from './fixtures/networks.js'
 
@@ -203,5 +203,13 @@ describe('POST /api/balance', () => {
     const again = await request(makeApp()).post('/api/balance').send(first.body.network)
     expect(again.body.message).toMatch(/ya coinciden/)
     expect((await request(makeApp()).post('/api/balance').send({})).status).toBe(400)
+  })
+})
+
+describe('GET /', () => {
+  it('redirige a la raíz de la API', async () => {
+    const res = await request(makeApp()).get('/')
+    expect(res.status).toBe(302)
+    expect(res.headers.location).toBe('/api')
   })
 })

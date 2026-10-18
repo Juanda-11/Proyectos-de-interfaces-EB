@@ -7,4 +7,4 @@ COPY src ./src
 USER node
 EXPOSE 3001
 HEALTHCHECK CMD wget -qO- http://localhost:3001/api/health || exit 1
-CMD ["node", "src/server.js"]
+CMD ["node", "src/local-server.js"]

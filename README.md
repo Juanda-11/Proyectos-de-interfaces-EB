@@ -80,8 +80,8 @@ npm run format       # Prettier
 
 ```
 src/
-├── app.js              # Construcción de la app Express (dependencias inyectables)
-├── server.js           # Arranque local
+├── create-app.js       # Construcción de la app Express (dependencias inyectables)
+├── local-server.js     # Arranque local
 ├── config.js           # Variables de entorno validadas
 ├── routes/             # health, simulate, optimize, export, copilot
 ├── services/
