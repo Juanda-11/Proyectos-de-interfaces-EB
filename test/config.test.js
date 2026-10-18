@@ -25,6 +25,18 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ NODE_ENV: 'staging' })).toThrow(/NODE_ENV/)
   })
 
+  it('trata las variables vacías como ausentes (p. ej. al copiar .env.example)', () => {
+    const c = loadConfig({
+      AI_PROVIDER: '',
+      GEMINI_API_KEY: '',
+      GEMINI_MODEL: '',
+      PORT: '',
+      CORS_ORIGINS: '',
+    })
+    expect(c).toMatchObject({ port: 3001, corsOrigins: ['http://localhost:5173'] })
+    expect(c.ai).toMatchObject({ provider: 'rules', apiKey: null })
+  })
+
   describe('proveedor de IA', () => {
     it('prefiere Gemini si hay clave', () => {
       const ai = loadConfig({ GEMINI_API_KEY: 'g', ANTHROPIC_API_KEY: 'a' }).ai

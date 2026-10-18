@@ -17,8 +17,11 @@ const envSchema = z.object({
   AI_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
 })
 
+/** En Vercel (y al copiar .env.example) una variable sin valor llega como cadena vacía: se trata como ausente. */
+const withoutEmpty = (env) => Object.fromEntries(Object.entries(env).filter(([, v]) => v !== ''))
+
 export function loadConfig(env = process.env) {
-  const parsed = envSchema.safeParse(env)
+  const parsed = envSchema.safeParse(withoutEmpty(env))
   if (!parsed.success) {
     const detail = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')
     throw new Error(`Configuración inválida: ${detail}`)
