@@ -11,6 +11,7 @@ import { healthRouter } from './routes/health.js'
 import { simulateRouter } from './routes/simulate.js'
 import { copilotRouter } from './routes/copilot.js'
 import { optimizeRouter } from './routes/optimize.js'
+import { exportRouter } from './routes/export.js'
 
 /**
  * Construye la aplicación Express. Todas las dependencias (configuración, logger,

@@ -162,3 +162,18 @@ describe('POST /api/optimize', () => {
     expect((await request(makeApp()).post('/api/optimize').send({})).status).toBe(400)
   })
 })
+
+describe('POST /api/export/epanet', () => {
+  it('devuelve el archivo .inp como descarga', async () => {
+    const res = await request(makeApp()).post('/api/export/epanet').send(demoNetwork())
+    expect(res.status).toBe(200)
+    expect(res.headers['content-type']).toMatch(/text\/plain/)
+    expect(res.headers['content-disposition']).toMatch(/hydrograph-red\.inp/)
+    expect(res.text).toContain('[RESERVOIRS]')
+  })
+  it('valida la entrada', async () => {
+    expect((await request(makeApp()).post('/api/export/epanet').send({ nodes: [] })).status).toBe(
+      400,
+    )
+  })
+})
