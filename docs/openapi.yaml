@@ -40,6 +40,38 @@ paths:
               schema: { $ref: '#/components/schemas/Simulation' }
         '400': { $ref: '#/components/responses/Error' }
         '429': { $ref: '#/components/responses/Error' }
+  /api/optimize:
+    post:
+      summary: Optimiza la red
+      description: >
+        Sube a la sección comercial los diámetros con velocidad excesiva y, si hace falta,
+        aumenta la altura de las bombas hasta cumplir la presión mínima.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Red optimizada y lista de cambios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  network: { $ref: '#/components/schemas/Network' }
+                  changes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type: { type: string, enum: [diameter, pumpHead] }
+                        elementId: { type: string }
+                        from: { type: number }
+                        to: { type: number }
+                  simulation: { $ref: '#/components/schemas/Simulation' }
+                  message: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
   /api/copilot:
     post:
       summary: Copiloto en lenguaje natural
