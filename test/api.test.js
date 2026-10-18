@@ -150,3 +150,15 @@ describe('X-Request-Id', () => {
     expect(bad.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/)
   })
 })
+
+describe('POST /api/optimize', () => {
+  it('corrige la red demo y devuelve los cambios', async () => {
+    const res = await request(makeApp()).post('/api/optimize').send(demoNetwork())
+    expect(res.status).toBe(200)
+    expect(res.body.changes).toEqual([{ type: 'diameter', elementId: 'c2', from: 50, to: 75 }])
+    expect(res.body.simulation.summary.status).toBe('ok')
+  })
+  it('valida la entrada', async () => {
+    expect((await request(makeApp()).post('/api/optimize').send({})).status).toBe(400)
+  })
+})

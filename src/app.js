@@ -10,6 +10,7 @@ import { createAnthropicClient } from './services/ai/anthropic.js'
 import { healthRouter } from './routes/health.js'
 import { simulateRouter } from './routes/simulate.js'
 import { copilotRouter } from './routes/copilot.js'
+import { optimizeRouter } from './routes/optimize.js'
 
 /**
  * Construye la aplicación Express. Todas las dependencias (configuración, logger,
@@ -37,7 +38,13 @@ export function createApp({ config = loadConfig(), log, ai } = {}) {
     }),
   )
 
-  app.use('/api', healthRouter({ config }), simulateRouter(), copilotRouter({ ai }))
+  app.use(
+    '/api',
+    healthRouter({ config }),
+    simulateRouter(),
+    optimizeRouter(),
+    copilotRouter({ ai }),
+  )
 
   app.use(notFound)
   app.use(errorHandler)
