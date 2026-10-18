@@ -6,7 +6,7 @@ import { MAX_VELOCITY } from './hydraulics.js'
 /** Intención de una orden del usuario, decidida por palabras clave. */
 export function classifyIntent(prompt) {
   if (/audit|presi[oó]n|presiones|fuga|revis|verific|diagn[oó]stic|anali[zc]/i.test(prompt)) return 'audit'
-  if (/dise|red|sector|genera|crea|arma/i.test(prompt)) return 'design'
+  if (/dise|red|sector|genera|crea|arma|barrio|urbaniz|vivienda|manzana|colonia/i.test(prompt)) return 'design'
   return 'help'
 }
 
