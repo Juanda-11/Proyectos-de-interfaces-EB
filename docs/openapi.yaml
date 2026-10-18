@@ -72,6 +72,25 @@ paths:
                   simulation: { $ref: '#/components/schemas/Simulation' }
                   message: { type: string }
         '400': { $ref: '#/components/responses/Error' }
+  /api/export/epanet:
+    post:
+      summary: Exporta la red a EPANET
+      description: >
+        Devuelve un archivo `.inp` (EPANET 2, unidades LPS, Hazen-Williams). Las bombas y
+        válvulas se dividen en dos nodos unidos por un enlace. Los caudales no se exportan:
+        EPANET los calcula a partir de las demandas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Archivo de texto EPANET
+          content:
+            text/plain:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
   /api/copilot:
     post:
       summary: Copiloto en lenguaje natural
