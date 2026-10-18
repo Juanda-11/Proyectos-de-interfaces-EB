@@ -58,3 +58,35 @@ export async function design(prompt, { ai, log } = {}) {
     simulation,
   }
 }
+
+// ---------- Auditoría ----------
+
+const AUDIT_SYSTEM = `Eres un ingeniero hidráulico que revisa una red de agua potable. Recibirás el resultado de una simulación en JSON.
+Resume en español, en máximo 3 frases, el estado de la red y la acción más importante. Usa únicamente los datos recibidos; no inventes cifras.`
+
+export function auditSummary(simulation) {
+  const { summary, issues } = simulation
+  if (issues.every((i) => i.severity === 'info') && summary.status === 'ok') {
+    return `Auditoría completa: velocidades (máx. ${summary.maxVelocity} m/s) y presiones (mín. ${summary.minPressure ?? '—'} m.c.a.) dentro de rango. La red es estable.`
+  }
+  const real = issues.filter((i) => i.severity !== 'info')
+  const lines = real.slice(0, 3).map((i) => `${i.message}${i.suggestion ? ` ${i.suggestion}` : ''}`)
+  const extra = real.length > 3 ? ` (y ${real.length - 3} más)` : ''
+  return `Detecté ${real.length} problema(s)${extra}: ${lines.join(' ')}`
+}
+
+export async function audit(network, { ai, log } = {}) {
+  const simulation = simulate(network)
+  let message = auditSummary(simulation)
+  let source = 'rules'
+  if (ai && simulation.issues.length) {
+    try {
+      const facts = { limites: { velocidadMax: MAX_VELOCITY, presionMin: MIN_PRESSURE }, resumen: simulation.summary, problemas: simulation.issues }
+      message = (await ai.complete({ system: AUDIT_SYSTEM, user: JSON.stringify(facts), maxTokens: 350 })).trim()
+      source = 'ai'
+    } catch (err) {
+      log?.warn?.({ err: err.message }, 'IA no disponible para auditar; se usa el resumen por reglas')
+    }
+  }
+  return { intent: 'audit', source, message, simulation }
+}
