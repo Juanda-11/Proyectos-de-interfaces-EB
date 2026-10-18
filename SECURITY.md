@@ -1,7 +1,7 @@
 # Seguridad
 
-- No subas claves al repositorio: `ANTHROPIC_API_KEY` se configura solo como variable de entorno (en Vercel: *Settings → Environment Variables*).
-- Para reportar una vulnerabilidad, abre un aviso privado en la pestaña *Security* del repositorio.
+- No subas claves al repositorio: `ANTHROPIC_API_KEY` se configura solo como variable de entorno (en Vercel: _Settings → Environment Variables_).
+- Para reportar una vulnerabilidad, abre un aviso privado en la pestaña _Security_ del repositorio.
 
 ## Medidas implementadas
 

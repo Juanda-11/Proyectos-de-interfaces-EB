@@ -1,18 +1,18 @@
 # HydroGraph AI — Backend
 
-API REST de **HydroGraph AI**, editor de redes de suministro de agua asistido por IA (proyecto final de *Diseño de Interfaces*). Calcula la hidráulica de la red, la audita, la optimiza, la exporta a EPANET y atiende al copiloto en lenguaje natural.
+API REST de **HydroGraph AI**, editor de redes de suministro de agua asistido por IA (proyecto final de _Diseño de Interfaces_). Calcula la hidráulica de la red, la audita, la optimiza, la exporta a EPANET y atiende al copiloto en lenguaje natural.
 
 > Frontend: [Proyectos-de-interfaces-E](https://github.com/Juanda-11/Proyectos-de-interfaces-E)
 
 ## Qué hace
 
-| Endpoint | Descripción |
-|---|---|
-| `GET /api/health` | Estado del servicio y motor de IA activo |
-| `POST /api/simulate` | Velocidad y pérdida de carga (Hazen-Williams) por tubería, presión por nodo y lista de problemas |
-| `POST /api/optimize` | Corrige diámetros con velocidad excesiva y sube la altura de bombas si falta presión |
-| `POST /api/export/epanet` | Descarga la red como archivo `.inp` de EPANET 2 |
-| `POST /api/copilot` | Orden en lenguaje natural: diseñar una red o auditar la actual |
+| Endpoint                  | Descripción                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| `GET /api/health`         | Estado del servicio y motor de IA activo                                                         |
+| `POST /api/simulate`      | Velocidad y pérdida de carga (Hazen-Williams) por tubería, presión por nodo y lista de problemas |
+| `POST /api/optimize`      | Corrige diámetros con velocidad excesiva y sube la altura de bombas si falta presión             |
+| `POST /api/export/epanet` | Descarga la red como archivo `.inp` de EPANET 2                                                  |
+| `POST /api/copilot`       | Orden en lenguaje natural: diseñar una red o auditar la actual                                   |
 
 La especificación completa está en [`docs/openapi.yaml`](docs/openapi.yaml).
 
@@ -31,14 +31,14 @@ curl -s localhost:3001/api/copilot -H 'content-type: application/json' \
 
 ## Variables de entorno
 
-| Variable | Por defecto | Uso |
-|---|---|---|
-| `PORT` | `3001` | Puerto local |
-| `CORS_ORIGINS` | `http://localhost:5173` | Orígenes permitidos, separados por comas. En producción, la URL del frontend |
-| `RATE_LIMIT_MAX` | `60` | Peticiones por minuto y por IP |
-| `ANTHROPIC_API_KEY` | — | Activa el copiloto con Claude. Sin ella funciona el motor por reglas |
-| `ANTHROPIC_MODEL` | `claude-haiku-5-5` | Modelo usado por el copiloto |
-| `AI_TIMEOUT_MS` | `15000` | Tiempo máximo de espera a la IA |
+| Variable            | Por defecto             | Uso                                                                          |
+| ------------------- | ----------------------- | ---------------------------------------------------------------------------- |
+| `PORT`              | `3001`                  | Puerto local                                                                 |
+| `CORS_ORIGINS`      | `http://localhost:5173` | Orígenes permitidos, separados por comas. En producción, la URL del frontend |
+| `RATE_LIMIT_MAX`    | `60`                    | Peticiones por minuto y por IP                                               |
+| `ANTHROPIC_API_KEY` | —                       | Activa el copiloto con Claude. Sin ella funciona el motor por reglas         |
+| `ANTHROPIC_MODEL`   | `claude-haiku-5-5`      | Modelo usado por el copiloto                                                 |
+| `AI_TIMEOUT_MS`     | `15000`                 | Tiempo máximo de espera a la IA                                              |
 
 ## Cómo funciona la IA
 
@@ -57,10 +57,11 @@ Cualquier fallo de la IA (sin clave, timeout, JSON inválido, valores fuera de r
 
 ## Despliegue en Vercel
 
-1. En Vercel: **Add New → Project**, importa este repositorio (el preset es *Other*, no hay paso de build).
-2. En *Settings → Environment Variables* define `CORS_ORIGINS` con la URL del frontend (p. ej. `https://hydrograph-ai.vercel.app`) y, si quieres IA, `ANTHROPIC_API_KEY`.
+1. En Vercel: **Add New → Project**, importa este repositorio (el preset es _Other_, no hay paso de build).
+2. En _Settings → Environment Variables_ define `CORS_ORIGINS` con la URL del frontend (p. ej. `https://hydrograph-ai.vercel.app`) y, si quieres IA, `ANTHROPIC_API_KEY`.
 3. Despliega. [`vercel.json`](vercel.json) enruta `/api/*` a la función [`api/index.js`](api/index.js).
 4. Comprueba `https://<tu-backend>.vercel.app/api/health`.
+5. Despliega el [frontend](https://github.com/Juanda-11/Proyectos-de-interfaces-E/blob/main/docs/DEPLOY.md) con `VITE_API_URL` apuntando a esta URL.
 
 También hay un [`Dockerfile`](Dockerfile) para ejecutarlo en cualquier otro servidor.
 
