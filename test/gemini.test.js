@@ -45,13 +45,11 @@ describe('createGeminiClient', () => {
     await expect(make(vi.fn().mockRejectedValue(timeout)).complete({ user: 'u' })).rejects.toThrow(
       /tardó/,
     )
-    const blocked = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({ promptFeedback: { blockReason: 'SAFETY' } }),
-      })
+    const blocked = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ promptFeedback: { blockReason: 'SAFETY' } }),
+    })
     await expect(make(blocked).complete({ user: 'u' })).rejects.toThrow(/vacía/)
   })
 })
