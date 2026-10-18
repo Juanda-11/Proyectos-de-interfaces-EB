@@ -196,6 +196,8 @@ components:
             type: object
             properties:
               id: { type: string }
+              from: { type: string }
+              to: { type: string }
               length: { type: number }
               velocity: { type: number }
               headLoss: { type: number }
