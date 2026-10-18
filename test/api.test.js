@@ -26,7 +26,9 @@ describe('GET /api/health', () => {
     const res = await request(makeApp({ ANTHROPIC_API_KEY: 'k', ANTHROPIC_MODEL: 'm1' })).get(
       '/api/health',
     )
-    expect(res.body.ai).toBe('m1')
+    expect(res.body).toMatchObject({ ai: 'm1', provider: 'anthropic' })
+    const g = await request(makeApp({ GEMINI_API_KEY: 'k' })).get('/api/health')
+    expect(g.body).toMatchObject({ ai: 'gemini-2.5-flash', provider: 'gemini' })
   })
 })
 
