@@ -112,3 +112,12 @@ describe('errores generales', () => {
     expect(codes).toEqual([200, 200, 429])
   })
 })
+
+describe('X-Request-Id', () => {
+  it('reutiliza un id válido y descarta uno sospechoso', async () => {
+    const app = makeApp()
+    expect((await request(app).get('/api/health').set('x-request-id', 'abc-123')).headers['x-request-id']).toBe('abc-123')
+    const bad = await request(app).get('/api/health').set('x-request-id', 'a b<script>')
+    expect(bad.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/)
+  })
+})

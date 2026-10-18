@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto'
 
 /** Asigna un id a cada petición, lo devuelve en `X-Request-Id` y registra su duración. */
 export const requestContext = (log) => (req, res, next) => {
-  req.id = req.get('x-request-id') || randomUUID()
+  const incoming = req.get('x-request-id')
+  req.id = incoming && /^[\w-]{1,64}$/.test(incoming) ? incoming : randomUUID()
   req.log = log
   res.set('X-Request-Id', req.id)
   const start = process.hrtime.bigint()
