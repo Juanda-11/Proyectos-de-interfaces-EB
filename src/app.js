@@ -12,6 +12,7 @@ import { simulateRouter } from './routes/simulate.js'
 import { copilotRouter } from './routes/copilot.js'
 import { optimizeRouter } from './routes/optimize.js'
 import { exportRouter } from './routes/export.js'
+import { indexRouter } from './routes/index.js'
 
 /**
  * Construye la aplicación Express. Todas las dependencias (configuración, logger,
@@ -41,6 +42,7 @@ export function createApp({ config = loadConfig(), log, ai } = {}) {
 
   app.use(
     '/api',
+    indexRouter(),
     healthRouter({ config }),
     simulateRouter(),
     optimizeRouter(),

@@ -177,3 +177,12 @@ describe('POST /api/export/epanet', () => {
     )
   })
 })
+
+describe('GET /api', () => {
+  it('lista los endpoints disponibles', async () => {
+    const res = await request(makeApp()).get('/api')
+    expect(res.status).toBe(200)
+    expect(res.body.endpoints).toContain('POST /api/simulate')
+    expect(res.body.version).toMatch(/^\d+\.\d+\.\d+$/)
+  })
+})
