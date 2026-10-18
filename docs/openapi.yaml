@@ -1,0 +1,257 @@
+openapi: 3.0.3
+info:
+  title: HydroGraph AI API
+  version: 1.0.0
+  description: Simulación hidráulica, auditoría y generación de redes de agua con ayuda de IA.
+servers:
+  - url: http://localhost:3001
+    description: Desarrollo local
+paths:
+  /api/health:
+    get:
+      summary: Estado del servicio
+      responses:
+        '200':
+          description: Servicio activo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  uptime: { type: integer, description: Segundos en ejecución }
+                  ai:
+                    {
+                      type: string,
+                      description: 'Modelo de IA activo o "rules"',
+                      example: gemini-2.5-flash,
+                    }
+                  provider: { type: string, enum: [gemini, anthropic, rules] }
+  /api/simulate:
+    post:
+      summary: Simula la red
+      description: >
+        Calcula velocidad y pérdida de carga (Hazen-Williams) por tubería, presión y altura
+        piezométrica por nodo, y lista los problemas detectados.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Resultado de la simulación
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Simulation' }
+        '400': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /api/balance:
+    post:
+      summary: Calcula los caudales a partir de las demandas
+      description: >
+        Reparte la demanda de los nodos de consumo por la red en árbol que parte de los tanques:
+        cada tubería lleva la suma de la demanda aguas abajo. Las tuberías de anillo y los nodos
+        sin conexión conservan su caudal.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Red con caudales recalculados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  network: { $ref: '#/components/schemas/Network' }
+                  changes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        pipeId: { type: string }
+                        from: { type: number }
+                        to: { type: number }
+                  totalDemand: { type: number, description: Demanda total atendida (L/s) }
+                  unreached: { type: array, items: { type: string } }
+                  loops: { type: array, items: { type: string } }
+                  simulation: { $ref: '#/components/schemas/Simulation' }
+                  message: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/optimize:
+    post:
+      summary: Optimiza la red
+      description: >
+        Sube a la sección comercial los diámetros con velocidad excesiva y, si hace falta,
+        aumenta la altura de las bombas hasta cumplir la presión mínima.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Red optimizada y lista de cambios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  network: { $ref: '#/components/schemas/Network' }
+                  changes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type: { type: string, enum: [diameter, pumpHead] }
+                        elementId: { type: string }
+                        from: { type: number }
+                        to: { type: number }
+                  simulation: { $ref: '#/components/schemas/Simulation' }
+                  message: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/export/epanet:
+    post:
+      summary: Exporta la red a EPANET
+      description: >
+        Devuelve un archivo `.inp` (EPANET 2, unidades LPS, Hazen-Williams). Las bombas y
+        válvulas se dividen en dos nodos unidos por un enlace. Los caudales no se exportan:
+        EPANET los calcula a partir de las demandas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Archivo de texto EPANET
+          content:
+            text/plain:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+  /api/copilot:
+    post:
+      summary: Copiloto en lenguaje natural
+      description: >
+        Interpreta una orden. Si pide diseñar, devuelve una red nueva; si pide auditar,
+        simula la red enviada y explica los problemas. Usa Gemini o Claude si el servidor tiene
+        `GEMINI_API_KEY` o `ANTHROPIC_API_KEY`; si no, un motor por reglas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt: { type: string, maxLength: 500, example: Diseñar red para 4 sectores }
+                network: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Respuesta del copiloto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  intent: { type: string, enum: [design, audit, help] }
+                  source: { type: string, enum: [ai, rules] }
+                  message: { type: string }
+                  network: { $ref: '#/components/schemas/Network' }
+                  simulation: { $ref: '#/components/schemas/Simulation' }
+        '400': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+components:
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code: { type: string, example: VALIDATION_ERROR }
+                  message: { type: string }
+                  details: { type: array, items: { type: object } }
+                  requestId: { type: string }
+  schemas:
+    Node:
+      type: object
+      required: [id, type, x, y]
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [tank, pump, valve, junction] }
+        name: { type: string }
+        x: { type: number }
+        y: { type: number }
+        pressure: { type: number, description: 'Tanque: nivel (m). Bomba: altura aportada (m).' }
+        elevation: { type: number, description: Cota del terreno (m) }
+        demand: { type: number, description: Demanda (L/s) }
+    Pipe:
+      type: object
+      required: [id, from, to, diameter, flow]
+      properties:
+        id: { type: string }
+        from: { type: string }
+        to: { type: string }
+        diameter: { type: number, description: Diámetro nominal (mm) }
+        flow: { type: number, description: Caudal (L/s) }
+        length: { type: number, description: Longitud (m); si falta se calcula con las coordenadas }
+        roughness: { type: number, description: Coeficiente C de Hazen-Williams (por defecto 130) }
+    Network:
+      type: object
+      required: [nodes, pipes]
+      properties:
+        nodes: { type: array, items: { $ref: '#/components/schemas/Node' } }
+        pipes: { type: array, items: { $ref: '#/components/schemas/Pipe' } }
+    Simulation:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            status: { type: string, enum: [ok, warning, critical] }
+            maxVelocity: { type: number }
+            minPressure: { type: number, nullable: true }
+            maxPressure: { type: number, nullable: true }
+            totalHeadLoss: { type: number }
+            issueCount: { type: integer }
+        nodes:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              status: { type: string, enum: [ok, low, high, critical, disconnected] }
+              head: { type: number, nullable: true }
+              pressure: { type: number, nullable: true }
+        pipes:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              from: { type: string }
+              to: { type: string }
+              length: { type: number }
+              velocity: { type: number }
+              headLoss: { type: number }
+              gradient: { type: number, description: m/km }
+              status: { type: string, enum: [ok, warn] }
+              suggestedDiameter: { type: number }
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              severity: { type: string, enum: [info, warning, critical] }
+              code: { type: string }
+              elementId: { type: string, nullable: true }
+              message: { type: string }
+              suggestion: { type: string }

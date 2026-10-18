@@ -1,0 +1,39 @@
+{
+  "name": "hydrograph-ai-backend",
+  "version": "1.0.0",
+  "description": "API REST de HydroGraph AI: simulación hidráulica, auditoría y generación de redes de agua con IA.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/local-server.js",
+    "start": "node src/local-server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run format:check && npm test"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "supertest": "^7.3.1",
+    "vitest": "^5.0.5",
+    "yaml": "^2.9.1"
+  }
+}
