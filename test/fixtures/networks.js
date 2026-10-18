@@ -1,5 +1,12 @@
 const node = (id, type, x, y, name, pressure, elevation, demand) => ({
-  id, type, x, y, name, pressure, elevation, ...(demand ? { demand } : {}),
+  id,
+  type,
+  x,
+  y,
+  name,
+  pressure,
+  elevation,
+  ...(demand ? { demand } : {}),
 })
 
 /** Red demo del editor: tanque → bomba → nodo → 3 sectores (el último subdimensionado). */

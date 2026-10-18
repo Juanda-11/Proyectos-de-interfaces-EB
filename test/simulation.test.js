@@ -32,7 +32,15 @@ describe('simulate', () => {
 
   it('marca nodos desconectados', () => {
     const net = demoNetwork()
-    net.nodes.push({ id: 'X', type: 'junction', name: 'Huérfano', x: 0, y: 0, pressure: 0, elevation: 0 })
+    net.nodes.push({
+      id: 'X',
+      type: 'junction',
+      name: 'Huérfano',
+      x: 0,
+      y: 0,
+      pressure: 0,
+      elevation: 0,
+    })
     const r = simulate(net)
     expect(byId(r.nodes).X).toMatchObject({ status: 'disconnected', pressure: null })
     expect(r.issues.some((i) => i.code === 'DISCONNECTED' && i.elementId === 'X')).toBe(true)

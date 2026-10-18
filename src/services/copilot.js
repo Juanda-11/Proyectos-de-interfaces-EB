@@ -5,8 +5,10 @@ import { MAX_VELOCITY } from './hydraulics.js'
 
 /** Intención de una orden del usuario, decidida por palabras clave. */
 export function classifyIntent(prompt) {
-  if (/audit|presi[oó]n|presiones|fuga|revis|verific|diagn[oó]stic|anali[zc]/i.test(prompt)) return 'audit'
-  if (/dise|red|sector|genera|crea|arma|barrio|urbaniz|vivienda|manzana|colonia/i.test(prompt)) return 'design'
+  if (/audit|presi[oó]n|presiones|fuga|revis|verific|diagn[oó]stic|anali[zc]/i.test(prompt))
+    return 'audit'
+  if (/dise|red|sector|genera|crea|arma|barrio|urbaniz|vivienda|manzana|colonia/i.test(prompt))
+    return 'design'
   return 'help'
 }
 
@@ -37,7 +39,12 @@ async function designParams(prompt, ai, log) {
     try {
       const raw = await ai.complete({ system: DESIGN_SYSTEM, user: prompt, maxTokens: 300 })
       const p = aiDesignSchema.parse(extractJson(raw))
-      return { sectors: p.sectors, demand: p.demandPerSector, explanation: p.explanation, source: 'ai' }
+      return {
+        sectors: p.sectors,
+        demand: p.demandPerSector,
+        explanation: p.explanation,
+        source: 'ai',
+      }
     } catch (err) {
       log?.warn?.({ err: err.message }, 'IA no disponible para diseñar; se usa el motor por reglas')
     }
@@ -53,7 +60,9 @@ export async function design(prompt, { ai, log } = {}) {
   return {
     intent: 'design',
     source,
-    message: explanation ? `${summary} ${explanation}` : `${summary} Pulsa "Simular Flujo" para verificar presiones.`,
+    message: explanation
+      ? `${summary} ${explanation}`
+      : `${summary} Pulsa "Simular Flujo" para verificar presiones.`,
     network,
     simulation,
   }
@@ -81,11 +90,20 @@ export async function audit(network, { ai, log } = {}) {
   let source = 'rules'
   if (ai && simulation.issues.length) {
     try {
-      const facts = { limites: { velocidadMax: MAX_VELOCITY, presionMin: MIN_PRESSURE }, resumen: simulation.summary, problemas: simulation.issues }
-      message = (await ai.complete({ system: AUDIT_SYSTEM, user: JSON.stringify(facts), maxTokens: 350 })).trim()
+      const facts = {
+        limites: { velocidadMax: MAX_VELOCITY, presionMin: MIN_PRESSURE },
+        resumen: simulation.summary,
+        problemas: simulation.issues,
+      }
+      message = (
+        await ai.complete({ system: AUDIT_SYSTEM, user: JSON.stringify(facts), maxTokens: 350 })
+      ).trim()
       source = 'ai'
     } catch (err) {
-      log?.warn?.({ err: err.message }, 'IA no disponible para auditar; se usa el resumen por reglas')
+      log?.warn?.(
+        { err: err.message },
+        'IA no disponible para auditar; se usa el resumen por reglas',
+      )
     }
   }
   return { intent: 'audit', source, message, simulation }

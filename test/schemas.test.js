@@ -6,7 +6,10 @@ const pipe = (id, from, to, extra = {}) => ({ id, from, to, diameter: 100, flow:
 
 describe('networkSchema', () => {
   it('acepta una red válida y aplica valores por defecto', () => {
-    const r = networkSchema.safeParse({ nodes: [node('A'), node('B')], pipes: [pipe('p', 'A', 'B')] })
+    const r = networkSchema.safeParse({
+      nodes: [node('A'), node('B')],
+      pipes: [pipe('p', 'A', 'B')],
+    })
     expect(r.success).toBe(true)
     expect(r.data.nodes[0].pressure).toBe(0)
     expect(r.data.nodes[0].elevation).toBe(0)
@@ -25,7 +28,14 @@ describe('networkSchema', () => {
     expect(r.success).toBe(false)
   })
   it('rechaza diámetros fuera de rango y tipos desconocidos', () => {
-    expect(networkSchema.safeParse({ nodes: [node('A'), node('B')], pipes: [pipe('p', 'A', 'B', { diameter: 1 })] }).success).toBe(false)
-    expect(networkSchema.safeParse({ nodes: [node('A', 'reactor')], pipes: [] }).success).toBe(false)
+    expect(
+      networkSchema.safeParse({
+        nodes: [node('A'), node('B')],
+        pipes: [pipe('p', 'A', 'B', { diameter: 1 })],
+      }).success,
+    ).toBe(false)
+    expect(networkSchema.safeParse({ nodes: [node('A', 'reactor')], pipes: [] }).success).toBe(
+      false,
+    )
   })
 })

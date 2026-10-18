@@ -5,7 +5,10 @@ import { loadConfig } from '../src/config.js'
 import { demoNetwork } from './fixtures/networks.js'
 
 const makeApp = (env = {}, deps = {}) =>
-  createApp({ config: loadConfig({ NODE_ENV: 'test', CORS_ORIGINS: 'https://app.example', ...env }), ...deps })
+  createApp({
+    config: loadConfig({ NODE_ENV: 'test', CORS_ORIGINS: 'https://app.example', ...env }),
+    ...deps,
+  })
 
 describe('GET /api/health', () => {
   it('responde ok e indica el motor activo', async () => {
@@ -20,7 +23,9 @@ describe('GET /api/health', () => {
     expect(res.headers['x-request-id']).toBeTruthy()
   })
   it('refleja el modelo configurado', async () => {
-    const res = await request(makeApp({ ANTHROPIC_API_KEY: 'k', ANTHROPIC_MODEL: 'm1' })).get('/api/health')
+    const res = await request(makeApp({ ANTHROPIC_API_KEY: 'k', ANTHROPIC_MODEL: 'm1' })).get(
+      '/api/health',
+    )
     expect(res.body.ai).toBe('m1')
   })
 })
@@ -51,25 +56,34 @@ describe('POST /api/simulate', () => {
     expect(res.body.error.details[0].message).toMatch(/ZZ/)
   })
   it('responde 400 si el JSON está mal formado', async () => {
-    const res = await request(makeApp()).post('/api/simulate').set('content-type', 'application/json').send('{oops')
+    const res = await request(makeApp())
+      .post('/api/simulate')
+      .set('content-type', 'application/json')
+      .send('{oops')
     expect(res.status).toBe(400)
     expect(res.body.error.code).toBe('INVALID_JSON')
   })
   it('responde 413 si el cuerpo es demasiado grande', async () => {
-    const res = await request(makeApp()).post('/api/simulate').send({ blob: 'x'.repeat(300_000) })
+    const res = await request(makeApp())
+      .post('/api/simulate')
+      .send({ blob: 'x'.repeat(300_000) })
     expect(res.status).toBe(413)
   })
 })
 
 describe('POST /api/copilot', () => {
   it('diseña una red', async () => {
-    const res = await request(makeApp()).post('/api/copilot').send({ prompt: 'Diseñar red para 4 sectores' })
+    const res = await request(makeApp())
+      .post('/api/copilot')
+      .send({ prompt: 'Diseñar red para 4 sectores' })
     expect(res.status).toBe(200)
     expect(res.body).toMatchObject({ intent: 'design', source: 'rules' })
     expect(res.body.network.nodes).toHaveLength(7)
   })
   it('audita la red enviada', async () => {
-    const res = await request(makeApp()).post('/api/copilot').send({ prompt: 'Auditar presiones', network: demoNetwork() })
+    const res = await request(makeApp())
+      .post('/api/copilot')
+      .send({ prompt: 'Auditar presiones', network: demoNetwork() })
     expect(res.body.intent).toBe('audit')
     expect(res.body.simulation.issues).toHaveLength(1)
   })
@@ -85,10 +99,21 @@ describe('POST /api/copilot', () => {
   it('rechaza órdenes vacías o demasiado largas', async () => {
     const app = makeApp()
     expect((await request(app).post('/api/copilot').send({ prompt: '   ' })).status).toBe(400)
-    expect((await request(app).post('/api/copilot').send({ prompt: 'a'.repeat(501) })).status).toBe(400)
+    expect(
+      (
+        await request(app)
+          .post('/api/copilot')
+          .send({ prompt: 'a'.repeat(501) })
+      ).status,
+    ).toBe(400)
   })
   it('usa la IA inyectada y recurre a reglas si falla', async () => {
-    const ai = { complete: vi.fn().mockResolvedValueOnce('{"sectors":2,"demandPerSector":3,"explanation":"ok"}').mockRejectedValueOnce(new Error('x')) }
+    const ai = {
+      complete: vi
+        .fn()
+        .mockResolvedValueOnce('{"sectors":2,"demandPerSector":3,"explanation":"ok"}')
+        .mockRejectedValueOnce(new Error('x')),
+    }
     const app = makeApp({}, { ai })
     const a = await request(app).post('/api/copilot').send({ prompt: 'un barrio pequeño' })
     expect(a.body).toMatchObject({ source: 'ai' })
@@ -116,7 +141,11 @@ describe('errores generales', () => {
 describe('X-Request-Id', () => {
   it('reutiliza un id válido y descarta uno sospechoso', async () => {
     const app = makeApp()
-    expect((await request(app).get('/api/health').set('x-request-id', 'abc-123')).headers['x-request-id']).toBe('abc-123')
+    expect(
+      (await request(app).get('/api/health').set('x-request-id', 'abc-123')).headers[
+        'x-request-id'
+      ],
+    ).toBe('abc-123')
     const bad = await request(app).get('/api/health').set('x-request-id', 'a b<script>')
     expect(bad.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/)
   })

@@ -83,23 +83,55 @@ export function simulate(net, { metersPerUnit } = {}) {
   }
 
   const hasSource = net.nodes.some((n) => n.type === 'tank')
-  if (!hasSource) issue('critical', 'NO_SOURCE', null, 'La red no tiene ningún tanque que la alimente.', 'Agrega un tanque y conéctalo a la red.')
+  if (!hasSource)
+    issue(
+      'critical',
+      'NO_SOURCE',
+      null,
+      'La red no tiene ningún tanque que la alimente.',
+      'Agrega un tanque y conéctalo a la red.',
+    )
 
   const nodes = net.nodes.map((n) => {
     const s = solved.get(n.id)
     let status = 'ok'
     if (!s) {
       status = 'disconnected'
-      if (hasSource) issue('warning', 'DISCONNECTED', n.id, `${label(n)} no está conectado a ningún tanque.`, 'Conéctalo con una tubería a la red alimentada.')
+      if (hasSource)
+        issue(
+          'warning',
+          'DISCONNECTED',
+          n.id,
+          `${label(n)} no está conectado a ningún tanque.`,
+          'Conéctalo con una tubería a la red alimentada.',
+        )
     } else if (n.type !== 'tank' && s.pressure < 0) {
       status = 'critical'
-      issue('critical', 'NEGATIVE_PRESSURE', n.id, `${label(n)} tiene presión negativa (${round(s.pressure, 1)} m.c.a.): riesgo de cavitación y succión de contaminantes.`, 'Aumenta la altura de bomba o el diámetro de los tramos aguas arriba.')
+      issue(
+        'critical',
+        'NEGATIVE_PRESSURE',
+        n.id,
+        `${label(n)} tiene presión negativa (${round(s.pressure, 1)} m.c.a.): riesgo de cavitación y succión de contaminantes.`,
+        'Aumenta la altura de bomba o el diámetro de los tramos aguas arriba.',
+      )
     } else if (n.type === 'junction' && s.pressure < MIN_PRESSURE) {
       status = 'low'
-      issue('warning', 'LOW_PRESSURE', n.id, `${label(n)} tiene ${round(s.pressure, 1)} m.c.a., por debajo del mínimo de servicio (${MIN_PRESSURE}).`, 'Aumenta la altura de bomba o el diámetro de los tramos aguas arriba.')
+      issue(
+        'warning',
+        'LOW_PRESSURE',
+        n.id,
+        `${label(n)} tiene ${round(s.pressure, 1)} m.c.a., por debajo del mínimo de servicio (${MIN_PRESSURE}).`,
+        'Aumenta la altura de bomba o el diámetro de los tramos aguas arriba.',
+      )
     } else if (n.type !== 'tank' && s.pressure > MAX_PRESSURE) {
       status = 'high'
-      issue('warning', 'HIGH_PRESSURE', n.id, `${label(n)} supera la presión máxima (${round(s.pressure, 1)} > ${MAX_PRESSURE} m.c.a.).`, 'Instala una válvula reductora de presión o reduce la altura de bomba.')
+      issue(
+        'warning',
+        'HIGH_PRESSURE',
+        n.id,
+        `${label(n)} supera la presión máxima (${round(s.pressure, 1)} > ${MAX_PRESSURE} m.c.a.).`,
+        'Instala una válvula reductora de presión o reduce la altura de bomba.',
+      )
     }
     return {
       id: n.id,
@@ -112,9 +144,20 @@ export function simulate(net, { metersPerUnit } = {}) {
   for (const p of pipes) {
     const name = `${p.from}→${p.to}`
     if (p.status === 'warn') {
-      issue('warning', 'HIGH_VELOCITY', p.id, `El tramo ${name} circula a ${round(p._v, 2)} m/s (máx. recomendado ${MAX_VELOCITY} m/s).`, `Usa DN${p.suggestedDiameter}.`)
+      issue(
+        'warning',
+        'HIGH_VELOCITY',
+        p.id,
+        `El tramo ${name} circula a ${round(p._v, 2)} m/s (máx. recomendado ${MAX_VELOCITY} m/s).`,
+        `Usa DN${p.suggestedDiameter}.`,
+      )
     } else if (p._v > 0 && p._v < MIN_VELOCITY) {
-      issue('info', 'LOW_VELOCITY', p.id, `El tramo ${name} circula a ${round(p._v, 2)} m/s: riesgo de sedimentación.`)
+      issue(
+        'info',
+        'LOW_VELOCITY',
+        p.id,
+        `El tramo ${name} circula a ${round(p._v, 2)} m/s: riesgo de sedimentación.`,
+      )
     }
   }
 
@@ -128,7 +171,10 @@ export function simulate(net, { metersPerUnit } = {}) {
       maxVelocity: round(Math.max(0, ...pipes.map((p) => p._v)), 2),
       minPressure: consumers.length ? Math.min(...consumers.map((n) => n.pressure)) : null,
       maxPressure: consumers.length ? Math.max(...consumers.map((n) => n.pressure)) : null,
-      totalHeadLoss: round(pipes.filter((p) => treePipes.has(p.id)).reduce((s, p) => s + p._hf, 0), 2),
+      totalHeadLoss: round(
+        pipes.filter((p) => treePipes.has(p.id)).reduce((s, p) => s + p._hf, 0),
+        2,
+      ),
       issueCount: issues.filter((i) => i.severity !== 'info').length,
     },
     nodes,

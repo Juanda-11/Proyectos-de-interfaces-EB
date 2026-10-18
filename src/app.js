@@ -27,7 +27,15 @@ export function createApp({ config = loadConfig(), log, ai } = {}) {
   app.use(helmet())
   app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins }))
   app.use(express.json({ limit: '256kb' }))
-  app.use('/api', rateLimit({ windowMs: 60_000, limit: config.rateLimitMax, standardHeaders: 'draft-7', legacyHeaders: false }))
+  app.use(
+    '/api',
+    rateLimit({
+      windowMs: 60_000,
+      limit: config.rateLimitMax,
+      standardHeaders: 'draft-7',
+      legacyHeaders: false,
+    }),
+  )
 
   app.use('/api', healthRouter({ config }), simulateRouter(), copilotRouter({ ai }))
 

@@ -3,7 +3,11 @@ import { classifyIntent, design, audit, auditSummary } from '../src/services/cop
 import { simulate } from '../src/services/simulation.js'
 import { demoNetwork } from './fixtures/networks.js'
 
-const fakeAI = (reply) => ({ complete: vi.fn().mockImplementation(async () => (reply instanceof Error ? Promise.reject(reply) : reply)) })
+const fakeAI = (reply) => ({
+  complete: vi
+    .fn()
+    .mockImplementation(async () => (reply instanceof Error ? Promise.reject(reply) : reply)),
+})
 
 describe('classifyIntent', () => {
   it.each([
@@ -23,7 +27,9 @@ describe('design', () => {
     expect(r.simulation.summary.status).toBe('ok')
   })
   it('con IA aplica los parámetros devueltos (aunque vengan con texto alrededor)', async () => {
-    const ai = fakeAI('Claro: {"sectors": 5, "demandPerSector": 6, "explanation": "Barrio de 5 manzanas."}')
+    const ai = fakeAI(
+      'Claro: {"sectors": 5, "demandPerSector": 6, "explanation": "Barrio de 5 manzanas."}',
+    )
     const r = await design('un barrio con cinco manzanas', { ai })
     expect(r.source).toBe('ai')
     expect(r.network.nodes).toHaveLength(8)

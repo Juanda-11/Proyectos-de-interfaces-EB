@@ -6,7 +6,9 @@ export function createLogger({ level = 'info', stream = process.stdout } = {}) {
   const write = (name) => (fields, msg) => {
     if (LEVELS[name] < min) return
     if (typeof fields === 'string') [fields, msg] = [{}, fields]
-    stream.write(`${JSON.stringify({ level: name, time: new Date().toISOString(), msg, ...fields })}\n`)
+    stream.write(
+      `${JSON.stringify({ level: name, time: new Date().toISOString(), msg, ...fields })}\n`,
+    )
   }
   return { debug: write('debug'), info: write('info'), warn: write('warn'), error: write('error') }
 }

@@ -9,7 +9,16 @@ export const requestContext = (log) => (req, res, next) => {
   const start = process.hrtime.bigint()
   res.on('finish', () => {
     const ms = Number(process.hrtime.bigint() - start) / 1e6
-    log.info({ id: req.id, method: req.method, path: req.originalUrl, status: res.statusCode, ms: Math.round(ms) }, 'request')
+    log.info(
+      {
+        id: req.id,
+        method: req.method,
+        path: req.originalUrl,
+        status: res.statusCode,
+        ms: Math.round(ms),
+      },
+      'request',
+    )
   })
   next()
 }

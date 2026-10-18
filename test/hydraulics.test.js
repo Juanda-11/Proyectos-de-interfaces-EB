@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { velocity, suggestDiameter, headLoss, minorLoss, pipeLength } from '../src/services/hydraulics.js'
+import {
+  velocity,
+  suggestDiameter,
+  headLoss,
+  minorLoss,
+  pipeLength,
+} from '../src/services/hydraulics.js'
 
 describe('velocity', () => {
   it('calcula Q/A', () => {

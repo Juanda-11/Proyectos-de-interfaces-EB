@@ -22,8 +22,14 @@ export function loadConfig(env = process.env) {
   return {
     env: c.NODE_ENV,
     port: c.PORT,
-    corsOrigins: c.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean),
+    corsOrigins: c.CORS_ORIGINS.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     rateLimitMax: c.RATE_LIMIT_MAX,
-    ai: { apiKey: c.ANTHROPIC_API_KEY || null, model: c.ANTHROPIC_MODEL, timeoutMs: c.AI_TIMEOUT_MS },
+    ai: {
+      apiKey: c.ANTHROPIC_API_KEY || null,
+      model: c.ANTHROPIC_MODEL,
+      timeoutMs: c.AI_TIMEOUT_MS,
+    },
   }
 }

@@ -18,7 +18,8 @@ export function copilotRouter({ ai }) {
     const ctx = { ai, log: req.log }
     if (intent === 'design') return res.json(await design(prompt, ctx))
     if (intent === 'audit' && network) return res.json(await audit(network, ctx))
-    const message = intent === 'audit' ? 'Para auditar necesito la red actual del editor.' : HELP_MESSAGE
+    const message =
+      intent === 'audit' ? 'Para auditar necesito la red actual del editor.' : HELP_MESSAGE
     res.json({ intent: 'help', source: 'rules', message })
   })
   return router
