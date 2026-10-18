@@ -1,5 +1,7 @@
 import { Router } from 'express'
-import pkg from '../../package.json' with { type: 'json' }
+import { createRequire } from 'node:module'
+
+const pkg = createRequire(import.meta.url)('../../package.json')
 
 /** Índice de la API: nombre, versión y endpoints disponibles. */
 export function indexRouter() {
