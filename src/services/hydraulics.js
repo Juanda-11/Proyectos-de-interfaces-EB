@@ -41,3 +41,11 @@ export function headLoss(flowLps, diameterMm, lengthM, roughnessC = 130) {
 export function minorLoss(k, velocityMs) {
   return (k * velocityMs ** 2) / (2 * GRAVITY)
 }
+
+/** Metros del mundo por unidad de lienzo (el editor dibuja en píxeles). */
+export const METERS_PER_UNIT = 0.5
+
+/** Longitud de una tubería (m) a partir de las coordenadas de sus extremos. */
+export function pipeLength(a, b, metersPerUnit = METERS_PER_UNIT) {
+  return Math.hypot(b.x - a.x, b.y - a.y) * metersPerUnit
+}
