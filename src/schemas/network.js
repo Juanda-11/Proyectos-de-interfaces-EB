@@ -31,3 +31,25 @@ export const pipeSchema = z.object({
   /** Coeficiente de rugosidad de Hazen-Williams. */
   roughness: finite.min(50).max(160).optional(),
 })
+
+export const networkSchema = z
+  .object({
+    nodes: z.array(nodeSchema).min(1).max(200),
+    pipes: z.array(pipeSchema).max(400),
+  })
+  .superRefine((net, ctx) => {
+    const ids = new Set()
+    net.nodes.forEach((n, i) => {
+      if (ids.has(n.id)) ctx.addIssue({ code: 'custom', path: ['nodes', i, 'id'], message: `id de nodo duplicado: ${n.id}` })
+      ids.add(n.id)
+    })
+    const pipeIds = new Set()
+    net.pipes.forEach((p, i) => {
+      if (pipeIds.has(p.id)) ctx.addIssue({ code: 'custom', path: ['pipes', i, 'id'], message: `id de tubería duplicado: ${p.id}` })
+      pipeIds.add(p.id)
+      if (p.from === p.to) ctx.addIssue({ code: 'custom', path: ['pipes', i], message: 'una tubería no puede unir un nodo consigo mismo' })
+      for (const end of ['from', 'to']) {
+        if (!ids.has(p[end])) ctx.addIssue({ code: 'custom', path: ['pipes', i, end], message: `el nodo ${p[end]} no existe` })
+      }
+    })
+  })
