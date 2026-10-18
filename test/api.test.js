@@ -188,3 +188,20 @@ describe('GET /api', () => {
     expect(res.body.version).toMatch(/^\d+\.\d+\.\d+$/)
   })
 })
+
+describe('POST /api/balance', () => {
+  it('recalcula los caudales desde las demandas y simula el resultado', async () => {
+    const res = await request(makeApp()).post('/api/balance').send(demoNetwork())
+    expect(res.status).toBe(200)
+    expect(res.body.totalDemand).toBe(16)
+    expect(res.body.network.pipes.find((p) => p.id === 'a').flow).toBe(16)
+    expect(res.body.simulation.summary).toBeDefined()
+    expect(res.body.message).toMatch(/recalculados/)
+  })
+  it('avisa cuando ya estaba balanceada y valida la entrada', async () => {
+    const first = await request(makeApp()).post('/api/balance').send(demoNetwork())
+    const again = await request(makeApp()).post('/api/balance').send(first.body.network)
+    expect(again.body.message).toMatch(/ya coinciden/)
+    expect((await request(makeApp()).post('/api/balance').send({})).status).toBe(400)
+  })
+})

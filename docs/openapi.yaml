@@ -46,6 +46,41 @@ paths:
               schema: { $ref: '#/components/schemas/Simulation' }
         '400': { $ref: '#/components/responses/Error' }
         '429': { $ref: '#/components/responses/Error' }
+  /api/balance:
+    post:
+      summary: Calcula los caudales a partir de las demandas
+      description: >
+        Reparte la demanda de los nodos de consumo por la red en árbol que parte de los tanques:
+        cada tubería lleva la suma de la demanda aguas abajo. Las tuberías de anillo y los nodos
+        sin conexión conservan su caudal.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Network' }
+      responses:
+        '200':
+          description: Red con caudales recalculados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  network: { $ref: '#/components/schemas/Network' }
+                  changes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        pipeId: { type: string }
+                        from: { type: number }
+                        to: { type: number }
+                  totalDemand: { type: number, description: Demanda total atendida (L/s) }
+                  unreached: { type: array, items: { type: string } }
+                  loops: { type: array, items: { type: string } }
+                  simulation: { $ref: '#/components/schemas/Simulation' }
+                  message: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
   /api/optimize:
     post:
       summary: Optimiza la red
