@@ -5,7 +5,6 @@ export function notFound(req, _res, next) {
 }
 
 // Express identifica los manejadores de error por su aridad (4 argumentos)
-// eslint-disable-next-line no-unused-vars
 export function errorHandler(err, req, res, _next) {
   let status = err.status ?? err.statusCode ?? 500
   let code = err.code ?? 'INTERNAL_ERROR'
