@@ -1,0 +1,13 @@
+{
+  "name": "hydrograph-ai-backend",
+  "version": "1.0.0",
+  "description": "API REST de HydroGraph AI: simulación hidráulica, auditoría y generación de redes de agua con IA.",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "start": "node src/server.js"
+  },
+  "license": "MIT"
+}
