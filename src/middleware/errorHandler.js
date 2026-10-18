@@ -21,14 +21,12 @@ export function errorHandler(err, req, res, _next) {
     req.log?.error({ err: err.stack }, 'error no controlado')
     ;[status, code, message] = [500, 'INTERNAL_ERROR', 'Error interno del servidor']
   }
-  res
-    .status(status)
-    .json({
-      error: {
-        code: typeof code === 'string' ? code : 'ERROR',
-        message,
-        ...(err.details ? { details: err.details } : {}),
-        requestId: req.id,
-      },
-    })
+  res.status(status).json({
+    error: {
+      code: typeof code === 'string' ? code : 'ERROR',
+      message,
+      ...(err.details ? { details: err.details } : {}),
+      requestId: req.id,
+    },
+  })
 }
