@@ -38,11 +38,15 @@ curl -s localhost:3001/api/copilot -H 'content-type: application/json' \
 | `CORS_ORIGINS`      | `http://localhost:5173` | Orígenes permitidos, separados por comas. En producción, la URL del frontend                                 |
 | `RATE_LIMIT_MAX`    | `60`                    | Peticiones por minuto y por IP                                                                               |
 | `GEMINI_API_KEY`    | —                       | Activa el copiloto con **Gemini** (clave gratuita de [Google AI Studio](https://aistudio.google.com/apikey)) |
-| `GEMINI_MODEL`      | `gemini-2.5-flash`      | Modelo de Gemini; cámbialo si Google lo retira o quieres otro con más cupo gratuito                          |
+| `GEMINI_MODEL`      | `gemini-2.5-flash`      | Modelo de Gemini; alternativa si Google retira el modelo o se necesita otro con más cupo gratuito            |
 | `ANTHROPIC_API_KEY` | —                       | Alternativa: copiloto con Claude                                                                             |
 | `ANTHROPIC_MODEL`   | `claude-haiku-5-5`      | Modelo de Anthropic                                                                                          |
 | `AI_PROVIDER`       | automático              | `gemini`, `anthropic` o `rules`. Por defecto: Gemini si hay clave, luego Anthropic, luego reglas             |
 | `AI_TIMEOUT_MS`     | `15000`                 | Tiempo máximo de espera a la IA                                                                              |
+
+## Idiomas
+
+Los mensajes de la API (problemas detectados, sugerencias, respuestas del copiloto, errores y nombres de los componentes generados) están en **español e inglés**. El idioma se elige con la cabecera `Accept-Language` (`en` → inglés; por defecto, español). El copiloto también pide al modelo de IA que responda en ese idioma y entiende órdenes en ambos.
 
 ## Cómo funciona la IA
 
@@ -62,10 +66,10 @@ Cualquier fallo de la IA (sin clave, timeout, JSON inválido, valores fuera de r
 ## Despliegue en Vercel
 
 1. En Vercel: **Add New → Project**, importa este repositorio (el preset es _Other_, no hay paso de build).
-2. En _Settings → Environment Variables_ define `CORS_ORIGINS` con la URL del frontend (p. ej. `https://hydrograph-ai.vercel.app`) y, si quieres IA, `GEMINI_API_KEY` (gratuita).
+2. En _Settings → Environment Variables_ define `CORS_ORIGINS` con la URL del frontend (p. ej. `https://hydrograph-ai.vercel.app`) y, opcionalmente, `GEMINI_API_KEY` (gratuita) para activar la IA.
 3. Despliega. Vercel detecta Express y usa [`src/index.js`](src/index.js) como entrada (no hace falta `vercel.json`).
 4. Comprueba `https://<tu-backend>.vercel.app/api/health`.
-5. Despliega el [frontend](https://github.com/Juanda-11/Proyectos-de-interfaces-E/blob/main/docs/DEPLOY.md) con `VITE_API_URL` apuntando a esta URL.
+5. El [frontend](https://github.com/Juanda-11/Proyectos-de-interfaces-E/blob/main/docs/DEPLOY.md) se despliega después, con `VITE_API_URL` apuntando a esta URL.
 
 También hay un [`Dockerfile`](Dockerfile) para ejecutarlo en cualquier otro servidor.
 

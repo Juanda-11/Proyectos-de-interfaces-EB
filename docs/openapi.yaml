@@ -3,6 +3,10 @@ info:
   title: HydroGraph AI API
   version: 1.0.0
   description: Simulación hidráulica, auditoría y generación de redes de agua con ayuda de IA.
+x-language: >
+  Todas las respuestas con texto para personas (mensajes, sugerencias, nombres generados) se
+  devuelven en español o inglés según la cabecera `Accept-Language` (`en` → inglés; cualquier
+  otro valor o ausencia → español).
 servers:
   - url: http://localhost:3001
     description: Desarrollo local

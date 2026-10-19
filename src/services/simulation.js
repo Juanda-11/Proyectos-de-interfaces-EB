@@ -1,3 +1,4 @@
+import { t } from '../i18n.js'
 import {
   MAX_VELOCITY,
   MIN_VELOCITY,
@@ -23,7 +24,7 @@ const SEVERITY_RANK = { info: 0, warning: 1, critical: 2 }
  * de la bomba o menos la pérdida local de la válvula. Los tramos que cierran un
  * anillo se evalúan (velocidad, pérdida) pero no modifican las presiones.
  */
-export function simulate(net, { metersPerUnit } = {}) {
+export function simulate(net, { metersPerUnit, lang } = {}) {
   const nodeById = new Map(net.nodes.map((n) => [n.id, n]))
   const issues = []
   const issue = (severity, code, elementId, message, suggestion) =>
@@ -83,14 +84,7 @@ export function simulate(net, { metersPerUnit } = {}) {
   }
 
   const hasSource = net.nodes.some((n) => n.type === 'tank')
-  if (!hasSource)
-    issue(
-      'critical',
-      'NO_SOURCE',
-      null,
-      'La red no tiene ningún tanque que la alimente.',
-      'Agrega un tanque y conéctalo a la red.',
-    )
+  if (!hasSource) issue('critical', 'NO_SOURCE', null, t(lang, 'noSource'), t(lang, 'noSourceFix'))
 
   const nodes = net.nodes.map((n) => {
     const s = solved.get(n.id)
@@ -102,8 +96,8 @@ export function simulate(net, { metersPerUnit } = {}) {
           'warning',
           'DISCONNECTED',
           n.id,
-          `${label(n)} no está conectado a ningún tanque.`,
-          'Conéctalo con una tubería a la red alimentada.',
+          t(lang, 'disconnected', label(n)),
+          t(lang, 'disconnectedFix'),
         )
     } else if (n.type !== 'tank' && s.pressure < 0) {
       status = 'critical'
@@ -111,8 +105,8 @@ export function simulate(net, { metersPerUnit } = {}) {
         'critical',
         'NEGATIVE_PRESSURE',
         n.id,
-        `${label(n)} tiene presión negativa (${round(s.pressure, 1)} m.c.a.): riesgo de cavitación y succión de contaminantes.`,
-        'Aumenta la altura de bomba o el diámetro de los tramos aguas arriba.',
+        t(lang, 'negativePressure', label(n), round(s.pressure, 1)),
+        t(lang, 'raiseHead'),
       )
     } else if (n.type === 'junction' && s.pressure < MIN_PRESSURE) {
       status = 'low'
@@ -120,8 +114,8 @@ export function simulate(net, { metersPerUnit } = {}) {
         'warning',
         'LOW_PRESSURE',
         n.id,
-        `${label(n)} tiene ${round(s.pressure, 1)} m.c.a., por debajo del mínimo de servicio (${MIN_PRESSURE}).`,
-        'Aumenta la altura de bomba o el diámetro de los tramos aguas arriba.',
+        t(lang, 'lowPressure', label(n), round(s.pressure, 1), MIN_PRESSURE),
+        t(lang, 'raiseHead'),
       )
     } else if (n.type !== 'tank' && s.pressure > MAX_PRESSURE) {
       status = 'high'
@@ -129,8 +123,8 @@ export function simulate(net, { metersPerUnit } = {}) {
         'warning',
         'HIGH_PRESSURE',
         n.id,
-        `${label(n)} supera la presión máxima (${round(s.pressure, 1)} > ${MAX_PRESSURE} m.c.a.).`,
-        'Instala una válvula reductora de presión o reduce la altura de bomba.',
+        t(lang, 'highPressure', label(n), round(s.pressure, 1), MAX_PRESSURE),
+        t(lang, 'highPressureFix'),
       )
     }
     return {
@@ -148,16 +142,11 @@ export function simulate(net, { metersPerUnit } = {}) {
         'warning',
         'HIGH_VELOCITY',
         p.id,
-        `El tramo ${name} circula a ${round(p._v, 2)} m/s (máx. recomendado ${MAX_VELOCITY} m/s).`,
-        `Usa DN${p.suggestedDiameter}.`,
+        t(lang, 'highVelocity', name, round(p._v, 2), MAX_VELOCITY),
+        t(lang, 'useDn', p.suggestedDiameter),
       )
     } else if (p._v > 0 && p._v < MIN_VELOCITY) {
-      issue(
-        'info',
-        'LOW_VELOCITY',
-        p.id,
-        `El tramo ${name} circula a ${round(p._v, 2)} m/s: riesgo de sedimentación.`,
-      )
+      issue('info', 'LOW_VELOCITY', p.id, t(lang, 'lowVelocity', name, round(p._v, 2)))
     }
   }
 
