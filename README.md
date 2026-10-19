@@ -44,6 +44,10 @@ curl -s localhost:3001/api/copilot -H 'content-type: application/json' \
 | `AI_PROVIDER`       | automático              | `gemini`, `anthropic` o `rules`. Por defecto: Gemini si hay clave, luego Anthropic, luego reglas             |
 | `AI_TIMEOUT_MS`     | `15000`                 | Tiempo máximo de espera a la IA                                                                              |
 
+## Idiomas
+
+Los mensajes de la API (problemas detectados, sugerencias, respuestas del copiloto, errores y nombres de los componentes generados) están en **español e inglés**. El idioma se elige con la cabecera `Accept-Language` (`en` → inglés; por defecto, español). El copiloto también pide al modelo de IA que responda en ese idioma y entiende órdenes en ambos.
+
 ## Cómo funciona la IA
 
 El copiloto **no deja que el modelo invente la red**. El modelo (Gemini o Claude) interpreta la petición (`"un barrio con cinco manzanas"` → `{sectors: 5, demandPerSector: 6}`) y el backend construye la red con fórmulas hidráulicas, de modo que el resultado siempre es válido y dimensionado. Para auditar, el modelo solo redacta una explicación a partir de los resultados de la simulación.
