@@ -28,3 +28,20 @@ describe('t', () => {
     expect(Object.keys(catalog.en).sort()).toEqual(Object.keys(catalog.es).sort())
   })
 })
+
+describe('catálogo completo', () => {
+  it('cada mensaje se puede generar en ambos idiomas con argumentos de ejemplo', () => {
+    for (const lang of LANGS) {
+      for (const key of Object.keys(catalog[lang])) {
+        const text = t(lang, key, 'A', 2.5, 3)
+        expect(typeof text, `${lang}.${key}`).toBe('string')
+        expect(text.length, `${lang}.${key}`).toBeGreaterThan(0)
+      }
+    }
+  })
+  it('los mensajes con parámetros los incorporan', () => {
+    expect(t('es', 'lowPressure', 'S1', 4.2, 10)).toContain('S1')
+    expect(t('en', 'lowPressure', 'S1', 4.2, 10)).toContain('4.2')
+    expect(t('en', 'routeNotFound', 'GET', '/x')).toBe('Route not found: GET /x')
+  })
+})
