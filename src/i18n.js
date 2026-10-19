@@ -68,6 +68,13 @@ export const catalog = {
     noteUnreached: (n) => `${n} nodo(s) sin conexión a un tanque no se tuvieron en cuenta`,
     noteLoops: (n) => `${n} tubería(s) de anillo conservan su caudal`,
     note: (list) => ` Nota: ${list}.`,
+
+    // errores HTTP
+    validationFailed: 'Datos de entrada inválidos',
+    routeNotFound: (method, path) => `Ruta no encontrada: ${method} ${path}`,
+    invalidJson: 'El cuerpo no es JSON válido',
+    payloadTooLarge: 'El cuerpo de la petición es demasiado grande',
+    internalError: 'Error interno del servidor',
   },
   en: {
     noSource: () => 'The network has no tank feeding it.',
@@ -115,6 +122,12 @@ export const catalog = {
     noteUnreached: (n) => `${n} node(s) not connected to a tank were ignored`,
     noteLoops: (n) => `${n} loop pipe(s) keep their flow`,
     note: (list) => ` Note: ${list}.`,
+
+    validationFailed: 'Invalid input data',
+    routeNotFound: (method, path) => `Route not found: ${method} ${path}`,
+    invalidJson: 'The request body is not valid JSON',
+    payloadTooLarge: 'The request body is too large',
+    internalError: 'Internal server error',
   },
 }
 

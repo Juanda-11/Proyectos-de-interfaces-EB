@@ -1,3 +1,4 @@
+import { t } from '../i18n.js'
 import { MAX_VELOCITY, suggestDiameter, velocity } from './hydraulics.js'
 import { simulate } from './simulation.js'
 
@@ -59,20 +60,23 @@ export function fixPumpHead(network) {
   return { network: current, changes }
 }
 
-export function optimize(network) {
+export function optimize(network, { lang } = {}) {
   const diameters = fixDiameters(network)
   const pump = fixPumpHead(diameters.network)
   const changes = [...diameters.changes, ...pump.changes]
-  const simulation = simulate(pump.network)
-  return { network: pump.network, changes, simulation, message: describe(changes, simulation) }
+  const simulation = simulate(pump.network, { lang })
+  return {
+    network: pump.network,
+    changes,
+    simulation,
+    message: describe(changes, simulation, lang),
+  }
 }
 
-function describe(changes, simulation) {
+function describe(changes, simulation, lang) {
   const remaining = simulation.issues.filter((i) => i.severity !== 'info')
   if (!changes.length) {
-    return remaining.length
-      ? `No encontré ajustes automáticos; quedan ${remaining.length} problema(s) por revisar manualmente.`
-      : 'La red ya cumple los criterios de diseño; no hay nada que optimizar.'
+    return remaining.length ? t(lang, 'noAutoFix', remaining.length) : t(lang, 'nothingToOptimize')
   }
   const d = changes
     .filter((c) => c.type === 'diameter')
@@ -81,11 +85,9 @@ function describe(changes, simulation) {
     .filter((c) => c.type === 'pumpHead')
     .map((c) => `${c.elementId} (${c.from}→${c.to} m)`)
   const parts = [
-    d.length && `diámetros: ${d.join(', ')}`,
-    p.length && `altura de bomba: ${p.join(', ')}`,
+    d.length && t(lang, 'partDiameters', d.join(', ')),
+    p.length && t(lang, 'partPump', p.join(', ')),
   ].filter(Boolean)
-  const tail = remaining.length
-    ? ` Quedan ${remaining.length} problema(s) por revisar.`
-    : ' La red queda estable.'
-  return `Apliqué ${changes.length} cambio(s) — ${parts.join('; ')}.${tail}`
+  const tail = remaining.length ? t(lang, 'remaining', remaining.length) : t(lang, 'stable')
+  return t(lang, 'appliedChanges', changes.length, parts.join('; '), tail)
 }

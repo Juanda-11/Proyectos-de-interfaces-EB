@@ -6,7 +6,7 @@ import { simulate } from '../services/simulation.js'
 export function simulateRouter() {
   const router = Router()
   router.post('/simulate', validateBody(networkSchema), (req, res) => {
-    res.json(simulate(req.body))
+    res.json(simulate(req.body, { lang: req.lang }))
   })
   return router
 }
