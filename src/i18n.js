@@ -16,7 +16,7 @@ export function resolveLang(header) {
 
 const num = (v) => String(v)
 
-const messages = {
+export const catalog = {
   es: {
     noSource: () => 'La red no tiene ningún tanque que la alimente.',
     noSourceFix: () => 'Agrega un tanque y conéctalo a la red.',
@@ -120,6 +120,6 @@ const messages = {
 
 /** Devuelve el mensaje `key` en `lang`; si es una función, la llama con `args`. */
 export function t(lang, key, ...args) {
-  const entry = messages[lang]?.[key] ?? messages[DEFAULT_LANG][key]
+  const entry = catalog[lang]?.[key] ?? catalog[DEFAULT_LANG][key]
   return typeof entry === 'function' ? entry(...args) : entry
 }

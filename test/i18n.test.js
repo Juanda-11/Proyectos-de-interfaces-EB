@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { DEFAULT_LANG, LANGS, resolveLang, t } from '../src/i18n.js'
+import { DEFAULT_LANG, LANGS, catalog, resolveLang, t } from '../src/i18n.js'
 
 describe('resolveLang', () => {
   it.each([
@@ -22,21 +22,9 @@ describe('t', () => {
   it('usa español si el idioma no existe', () => {
     expect(t('fr', 'tank')).toBe('Tanque')
   })
-  it('ambos idiomas tienen exactamente las mismas claves', async () => {
-    const mod = await import('../src/i18n.js')
+  it('ambos idiomas tienen exactamente las mismas claves', () => {
     expect(LANGS).toEqual(['es', 'en'])
     expect(DEFAULT_LANG).toBe('es')
-    // las claves se comprueban llamando a cada una en ambos idiomas
-    for (const key of [
-      'noSource',
-      'help',
-      'designed',
-      'auditOk',
-      'balanced',
-      'note',
-      'lowVelocity',
-    ]) {
-      expect(mod.t('en', key, 1, 2, 3)).not.toBe(mod.t('es', key, 1, 2, 3))
-    }
+    expect(Object.keys(catalog.en).sort()).toEqual(Object.keys(catalog.es).sort())
   })
 })
