@@ -14,14 +14,43 @@ import { optimizeRouter } from './routes/optimize.js'
 import { exportRouter } from './routes/export.js'
 import { balanceRouter } from './routes/balance.js'
 import { indexRouter } from './routes/index.js'
+import { authRouter } from './routes/auth.js'
+import { HttpError } from './utils/httpError.js'
+import { t } from './i18n.js'
+import { requireAuth } from './middleware/auth.js'
+import { createAuthService } from './services/auth/service.js'
+import { createTokenService } from './services/auth/tokens.js'
+import { createMemoryUserStore, createUpstashUserStore } from './services/auth/store.js'
 
 /**
  * Construye la aplicación Express. Todas las dependencias (configuración, logger,
  * cliente de IA) son inyectables para poder probarla sin red ni variables de entorno.
  */
-export function createApp({ config = loadConfig(), log, ai } = {}) {
+export function createApp({ config = loadConfig(), log, ai, userStore } = {}) {
   log ??= createLogger({ level: config.env === 'test' ? 'silent' : 'info' })
   ai ??= createAiClient(config.ai)
+  userStore ??= config.auth.upstash
+    ? createUpstashUserStore(config.auth.upstash)
+    : createMemoryUserStore()
+  const auth = createAuthService({
+    config: config.auth,
+    store: userStore,
+    tokens: createTokenService({
+      secret: config.auth.secret ?? 'sin-configurar',
+      ttl: config.auth.ttl,
+    }),
+    env: config.env,
+  })
+  const guard = requireAuth({ config: config.auth, service: auth })
+  // Frena la fuerza bruta sobre contraseñas: pocos intentos por IP y ventana de 15 minutos
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60_000,
+    limit: config.env === 'test' ? 1000 : 30,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    handler: (req, _res, next) =>
+      next(new HttpError(429, t(req.lang, 'tooManyAttempts'), { code: 'TOO_MANY_ATTEMPTS' })),
+  })
 
   const app = express()
   app.disable('x-powered-by')
@@ -44,7 +73,10 @@ export function createApp({ config = loadConfig(), log, ai } = {}) {
   app.use(
     '/api',
     indexRouter(),
-    healthRouter({ config }),
+    healthRouter({ config, auth }),
+    authRouter({ config: config.auth, service: auth, guard, limiter: authLimiter }),
+    // A partir de aquí, todas las rutas exigen sesión iniciada
+    guard,
     simulateRouter(),
     balanceRouter(),
     optimizeRouter(),

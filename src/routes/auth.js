@@ -16,10 +16,10 @@ const registerSchema = z.object({
  * Rutas públicas de cuentas. `guard` es el middleware que protege `/me`;
  * `limiter` frena los intentos repetidos de inicio de sesión y registro.
  */
-export function authRouter({ service, guard, limiter }) {
+export function authRouter({ config, service, guard, limiter }) {
   const router = Router()
   const ensureReady = (req, _res, next) =>
-    req.authConfig.enabled && !req.authConfig.secret
+    config.enabled && !config.secret
       ? next(new HttpError(503, t(req.lang, 'authNotConfigured'), { code: 'AUTH_NOT_CONFIGURED' }))
       : next()
 

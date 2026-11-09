@@ -7,7 +7,7 @@ import { loadConfig } from '../src/config.js'
 import { demoNetwork } from './fixtures/networks.js'
 
 const spec = parse(readFileSync(new URL('../docs/openapi.yaml', import.meta.url), 'utf8'))
-const app = createApp({ config: loadConfig({ NODE_ENV: 'test' }) })
+const app = createApp({ config: loadConfig({ NODE_ENV: 'test', AUTH_ENABLED: 'false' }) })
 
 describe('contrato OpenAPI', () => {
   it('documenta los mismos endpoints que expone el índice de la API', async () => {

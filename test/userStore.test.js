@@ -75,13 +75,11 @@ describe('createUpstashUserStore', () => {
     const down = make(vi.fn().mockRejectedValue(new Error('ECONNRESET')))
     await expect(down.create(user)).rejects.toThrow(/ECONNRESET/)
     const html = make(
-      vi
-        .fn()
-        .mockResolvedValue({
-          ok: false,
-          status: 502,
-          json: async () => Promise.reject(new Error('x')),
-        }),
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 502,
+        json: async () => Promise.reject(new Error('x')),
+      }),
     )
     await expect(html.getByEmail('a@b.c')).rejects.toThrow(/502/)
   })
