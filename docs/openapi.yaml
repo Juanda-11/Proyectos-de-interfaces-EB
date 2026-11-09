@@ -7,6 +7,8 @@ x-language: >
   Todas las respuestas con texto para personas (mensajes, sugerencias, nombres generados) se
   devuelven en español o inglés según la cabecera `Accept-Language` (`en` → inglés; cualquier
   otro valor o ausencia → español).
+security:
+  - bearerAuth: []
 servers:
   - url: http://localhost:3001
     description: Desarrollo local
@@ -14,6 +16,7 @@ paths:
   /api/health:
     get:
       summary: Estado del servicio
+      security: []
       responses:
         '200':
           description: Servicio activo
@@ -31,6 +34,89 @@ paths:
                       example: gemini-2.5-flash,
                     }
                   provider: { type: string, enum: [gemini, anthropic, rules] }
+                  auth:
+                    type: object
+                    properties:
+                      enabled: { type: boolean }
+                      configured:
+                        { type: boolean, description: 'false si falta AUTH_SECRET en producción' }
+                      registration: { type: boolean }
+                      demo:
+                        type: object
+                        nullable: true
+                        description: Credenciales públicas de la cuenta de demostración (si están visibles)
+                        properties:
+                          email: { type: string }
+                          password: { type: string }
+  /api/auth/login:
+    post:
+      summary: Inicia sesión
+      security: []
+      description: >
+        Devuelve un token JWT (7 días por defecto) que se envía en la cabecera
+        `Authorization: Bearer <token>`. Admite la cuenta de demostración.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Sesión iniciada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /api/auth/register:
+    post:
+      summary: Crea una cuenta
+      security: []
+      description: >
+        Solo disponible si el servidor tiene almacenamiento persistente de usuarios
+        (o fuera de producción). Devuelve la sesión ya iniciada.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 60 }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8, maxLength: 128 }
+      responses:
+        '201':
+          description: Cuenta creada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /api/auth/me:
+    get:
+      summary: Usuario de la sesión actual
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Usuario autenticado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Error' }
   /api/simulate:
     post:
       summary: Simula la red
@@ -169,6 +255,8 @@ paths:
         '400': { $ref: '#/components/responses/Error' }
         '429': { $ref: '#/components/responses/Error' }
 components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
   responses:
     Error:
       description: Error
@@ -185,6 +273,17 @@ components:
                   details: { type: array, items: { type: object } }
                   requestId: { type: string }
   schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: string }
+    Session:
+      type: object
+      properties:
+        token: { type: string, description: JWT }
+        user: { $ref: '#/components/schemas/User' }
     Node:
       type: object
       required: [id, type, x, y]

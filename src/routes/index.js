@@ -13,6 +13,9 @@ export function indexRouter() {
       docs: 'https://github.com/Juanda-11/Proyectos-de-interfaces-EB/blob/main/docs/openapi.yaml',
       endpoints: [
         'GET /api/health',
+        'POST /api/auth/login',
+        'POST /api/auth/register',
+        'GET /api/auth/me',
         'POST /api/simulate',
         'POST /api/balance',
         'POST /api/optimize',
