@@ -6,7 +6,12 @@ import { demoNetwork } from './fixtures/networks.js'
 
 const makeApp = (env = {}, deps = {}) =>
   createApp({
-    config: loadConfig({ NODE_ENV: 'test', CORS_ORIGINS: 'https://app.example', ...env }),
+    config: loadConfig({
+      NODE_ENV: 'test',
+      AUTH_ENABLED: 'false',
+      CORS_ORIGINS: 'https://app.example',
+      ...env,
+    }),
     ...deps,
   })
 

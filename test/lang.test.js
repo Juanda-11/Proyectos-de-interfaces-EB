@@ -5,7 +5,8 @@ import { loadConfig } from '../src/config.js'
 import { classifyIntent } from '../src/services/copilot.js'
 import { demoNetwork } from './fixtures/networks.js'
 
-const makeApp = (deps) => createApp({ config: loadConfig({ NODE_ENV: 'test' }), ...deps })
+const makeApp = (deps) =>
+  createApp({ config: loadConfig({ NODE_ENV: 'test', AUTH_ENABLED: 'false' }), ...deps })
 const en = (req) => req.set('Accept-Language', 'en-US,en;q=0.9')
 
 describe('idioma de las respuestas', () => {
