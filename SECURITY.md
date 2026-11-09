@@ -5,6 +5,8 @@
 
 ## Medidas implementadas
 
+- Autenticación con contraseñas guardadas con scrypt (sal aleatoria), sesiones JWT firmadas (HS256, caducidad de 7 días), comparaciones en tiempo constante, mensaje idéntico ante correo inexistente o contraseña errónea y límite de intentos por IP.
+- Todas las rutas de cálculo y de IA requieren sesión, lo que además protege el cupo gratuito de la IA.
 - Validación estricta de todas las entradas con zod (tipos, rangos, integridad de la red).
 - Límite de tamaño del cuerpo (256 kB) y de peticiones por minuto y por IP.
 - Cabeceras de seguridad con `helmet` y CORS restringido a los orígenes configurados.

@@ -6,14 +6,15 @@ API REST de **HydroGraph AI**, editor de redes de suministro de agua asistido po
 
 ## Qué hace
 
-| Endpoint                  | Descripción                                                                                      |
-| ------------------------- | ------------------------------------------------------------------------------------------------ |
-| `GET /api/health`         | Estado del servicio y motor de IA activo                                                         |
-| `POST /api/simulate`      | Velocidad y pérdida de carga (Hazen-Williams) por tubería, presión por nodo y lista de problemas |
-| `POST /api/balance`       | Calcula los caudales de cada tramo a partir de las demandas de los nodos                         |
-| `POST /api/optimize`      | Corrige diámetros con velocidad excesiva y sube la altura de bombas si falta presión             |
-| `POST /api/export/epanet` | Descarga la red como archivo `.inp` de EPANET 2                                                  |
-| `POST /api/copilot`       | Orden en lenguaje natural: diseñar una red o auditar la actual                                   |
+| Endpoint                                                 | Descripción                                                                                      |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `GET /api/health`                                        | Estado del servicio y motor de IA activo                                                         |
+| `POST /api/auth/login` · `register` · `GET /api/auth/me` | Cuentas y sesión (JWT)                                                                           |
+| `POST /api/simulate`                                     | Velocidad y pérdida de carga (Hazen-Williams) por tubería, presión por nodo y lista de problemas |
+| `POST /api/balance`                                      | Calcula los caudales de cada tramo a partir de las demandas de los nodos                         |
+| `POST /api/optimize`                                     | Corrige diámetros con velocidad excesiva y sube la altura de bombas si falta presión             |
+| `POST /api/export/epanet`                                | Descarga la red como archivo `.inp` de EPANET 2                                                  |
+| `POST /api/copilot`                                      | Orden en lenguaje natural: diseñar una red o auditar la actual                                   |
 
 La especificación completa está en [`docs/openapi.yaml`](docs/openapi.yaml).
 
@@ -32,17 +33,31 @@ curl -s localhost:3001/api/copilot -H 'content-type: application/json' \
 
 ## Variables de entorno
 
-| Variable            | Por defecto             | Uso                                                                                                          |
-| ------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `PORT`              | `3001`                  | Puerto local                                                                                                 |
-| `CORS_ORIGINS`      | `http://localhost:5173` | Orígenes permitidos, separados por comas. En producción, la URL del frontend                                 |
-| `RATE_LIMIT_MAX`    | `60`                    | Peticiones por minuto y por IP                                                                               |
-| `GEMINI_API_KEY`    | —                       | Activa el copiloto con **Gemini** (clave gratuita de [Google AI Studio](https://aistudio.google.com/apikey)) |
-| `GEMINI_MODEL`      | `gemini-2.5-flash`      | Modelo de Gemini; alternativa si Google retira el modelo o se necesita otro con más cupo gratuito            |
-| `ANTHROPIC_API_KEY` | —                       | Alternativa: copiloto con Claude                                                                             |
-| `ANTHROPIC_MODEL`   | `claude-haiku-5-5`      | Modelo de Anthropic                                                                                          |
-| `AI_PROVIDER`       | automático              | `gemini`, `anthropic` o `rules`. Por defecto: Gemini si hay clave, luego Anthropic, luego reglas             |
-| `AI_TIMEOUT_MS`     | `15000`                 | Tiempo máximo de espera a la IA                                                                              |
+| Variable                                                      | Por defecto                                           | Uso                                                                                                          |
+| ------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `PORT`                                                        | `3001`                                                | Puerto local                                                                                                 |
+| `CORS_ORIGINS`                                                | `http://localhost:5173`                               | Orígenes permitidos, separados por comas. En producción, la URL del frontend                                 |
+| `RATE_LIMIT_MAX`                                              | `60`                                                  | Peticiones por minuto y por IP                                                                               |
+| `GEMINI_API_KEY`                                              | —                                                     | Activa el copiloto con **Gemini** (clave gratuita de [Google AI Studio](https://aistudio.google.com/apikey)) |
+| `GEMINI_MODEL`                                                | `gemini-2.5-flash`                                    | Modelo de Gemini; alternativa si Google retira el modelo o se necesita otro con más cupo gratuito            |
+| `AUTH_SECRET`                                                 | _(aleatorio en desarrollo)_                           | Secreto para firmar las sesiones; obligatorio en producción (≥ 32 caracteres)                                |
+| `AUTH_ENABLED`                                                | `true`                                                | `false` abre la API sin sesión (solo desarrollo)                                                             |
+| `AUTH_REGISTRATION`                                           | `auto`                                                | `auto` (solo con almacenamiento persistente), `on` u `off`                                                   |
+| `DEMO_EMAIL` · `DEMO_PASSWORD` · `DEMO_ENABLED` · `DEMO_HINT` | `demo@hydrograph.ai` · `Hydro2026!` · `true` · `true` | Cuenta de demostración; `DEMO_HINT=false` oculta sus credenciales en `/api/health`                           |
+| `UPSTASH_REDIS_REST_URL` · `UPSTASH_REDIS_REST_TOKEN`         | —                                                     | Almacenamiento persistente de usuarios (Upstash Redis o Vercel KV)                                           |
+| `ANTHROPIC_API_KEY`                                           | —                                                     | Alternativa: copiloto con Claude                                                                             |
+| `ANTHROPIC_MODEL`                                             | `claude-haiku-5-5`                                    | Modelo de Anthropic                                                                                          |
+| `AI_PROVIDER`                                                 | automático                                            | `gemini`, `anthropic` o `rules`. Por defecto: Gemini si hay clave, luego Anthropic, luego reglas             |
+| `AI_TIMEOUT_MS`                                               | `15000`                                               | Tiempo máximo de espera a la IA                                                                              |
+
+## Autenticación
+
+Todas las rutas de la API (salvo `/api`, `/api/health` y `/api/auth/*`) exigen una sesión: el cliente inicia sesión en `POST /api/auth/login` y envía el token recibido como `Authorization: Bearer <token>`.
+
+- **Cuentas**: `POST /api/auth/register` y `POST /api/auth/login`. Las contraseñas se guardan con **scrypt** (sal aleatoria) y las sesiones son **JWT firmados (HS256)** de 7 días. El inicio de sesión no revela si un correo existe y tiene límite de intentos por IP.
+- **Cuenta de demostración**: `demo@hydrograph.ai` / `Hydro2026!` (configurable con `DEMO_*`). No necesita base de datos.
+- **Registro**: los usuarios se guardan en **Upstash Redis** (nivel gratuito, también desde el Marketplace de Vercel; variables `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`, o las `KV_REST_API_*` de Vercel KV). Sin almacenamiento persistente, el registro queda desactivado en producción —las cuentas se perderían al reiniciar la función— y solo funciona la cuenta de demostración.
+- **`AUTH_SECRET`** (mínimo 32 caracteres) es obligatorio en producción; sin él, la API responde 503 `AUTH_NOT_CONFIGURED`. `AUTH_ENABLED=false` desactiva la protección (solo para desarrollo).
 
 ## Idiomas
 
