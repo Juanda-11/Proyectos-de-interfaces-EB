@@ -75,6 +75,12 @@ export const catalog = {
     invalidJson: 'El cuerpo no es JSON válido',
     payloadTooLarge: 'El cuerpo de la petición es demasiado grande',
     internalError: 'Error interno del servidor',
+    authRequired: 'Inicia sesión para continuar',
+    invalidCredentials: 'Correo o contraseña incorrectos',
+    emailTaken: 'Ya existe una cuenta con ese correo',
+    registrationDisabled: 'El registro de cuentas no está disponible en este servidor',
+    authNotConfigured: 'La autenticación no está configurada en el servidor (falta AUTH_SECRET)',
+    tooManyAttempts: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo',
   },
   en: {
     noSource: () => 'The network has no tank feeding it.',
@@ -128,6 +134,12 @@ export const catalog = {
     invalidJson: 'The request body is not valid JSON',
     payloadTooLarge: 'The request body is too large',
     internalError: 'Internal server error',
+    authRequired: 'Sign in to continue',
+    invalidCredentials: 'Incorrect email or password',
+    emailTaken: 'An account with that email already exists',
+    registrationDisabled: 'Account registration is not available on this server',
+    authNotConfigured: 'Authentication is not configured on the server (AUTH_SECRET is missing)',
+    tooManyAttempts: 'Too many attempts. Wait a few minutes and try again',
   },
 }
 
